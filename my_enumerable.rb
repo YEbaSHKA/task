@@ -120,6 +120,66 @@ module MyEnumerable
       end
       self
     end
+
+    def my_map
+        i = 0
+        temp = Array.new
+        if block_given?
+          while i < size
+            temp[i] = yield(self[i])
+            i += 1
+          end
+          return temp
+        end
+        return self
+    end
+
+    def my_length
+      i = 0
+      if self.empty?
+        result = 0
+      elsif self[i] == self[-1]
+        result = 1
+      else 
+        while self[i] != self[-1]
+          i += 1
+        end
+        result = i+1
+      end
+    end
+
+    def my_size
+      self.my_length
+    end 
+
+    def my_count(value = nil)
+      i = 0
+      result = 0
+      if !value.nil?
+        while i < my_size
+            if self[i] == value
+              result += 1
+            end
+            i += 1
+          end
+          result 
+        
+      elsif block_given?
+        if self.empty?
+          result
+        else 
+          while i < my_size
+            if yield(self[i])
+              result += 1
+            end
+            i += 1
+          end
+          result
+        end
+      else
+        self.my_size 
+      end  
+    end
   end
   
   class Array
