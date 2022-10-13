@@ -99,6 +99,27 @@ end
     false
   end
 
+  def my_each
+    i = 0
+    if block_given?
+      while i < size
+        yield(self[i])
+        i += 1
+      end
+    end
+    self
+  end
+
+  def my_map!
+    i = 0
+    if block_given?
+      while i < size
+        self[i] = yield(self[i])
+        i += 1
+      end
+    end
+    self
+  end
 end
 
 class Array
