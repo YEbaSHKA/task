@@ -13,16 +13,16 @@ module MyEnumerable
     end
   
     def my_reject
-      elemen[] = Array.new
+      element = []
       i = 0
       if block_given?
         while i < size
           if yield(self[i]) == false
-            elemen.push(self[i])
+            element.push(self[i])
           end
           i += 1
         end
-        elemen
+        element
       else
         self
       end
@@ -135,21 +135,13 @@ module MyEnumerable
     end
 
     def my_length
-      i = 0
-      if self.empty?
-        result = 0
-      elsif self[i] == self[-1]
-        result = 1
-      else 
-        while self[i] != self[-1]
-          i += 1
-        end
-        result = i+1
-      end
+      size = 0
+      each { size += 1 }
+      size
     end
 
     def my_size
-      self.my_length
+      my_length
     end 
 
     def my_count(value = nil)
@@ -157,11 +149,11 @@ module MyEnumerable
       result = 0
       if !value.nil?
         while i < my_size
-            if self[i] == value
-              result += 1
-            end
-            i += 1
+          if self[i] == value
+            result += 1
           end
+          i += 1
+        end
           result 
         
       elsif block_given?
@@ -180,6 +172,71 @@ module MyEnumerable
         self.my_size 
       end  
     end
+
+    def my_select
+      temp = []
+      i = 0
+      k = 0
+      if block_given?
+        while i < my_size
+          if yield(self[i])
+            temp[k] = self[i]
+            k += 1
+          end
+          i += 1
+        end
+        temp 
+      else
+        self
+      end
+    end
+
+    def my_find
+      return to_enum(:my_find) unless block_given?
+      each { |item| return item if yield(item) }
+      false
+    end
+
+    def my_find_all
+      temp = []
+      return to_enum(:my_find_all) unless block_given?
+      each { |item| temp.push(item)  if yield(item)}
+      temp
+    end
+
+    def my_find_index
+        i = 0
+        return to_enum(:my_find_index) unless block_given?
+        each do |item| 
+          return i if yield(item)
+          i += 1
+        end
+    end
+    
+    # def my_max(value = nil)
+    #   if value.nil?
+    #     max_value = self[0]
+    #     each {|item| max_value = item if max_value < item }
+    #     max_value
+    #   elsif !block_given?
+    #     arr = []
+    #     self.sort
+    #     arr = self.sort{|a, b| b <=> a}
+    #     arr[0..value-1]
+    #   else
+    #     arr = []
+    #     i = 0
+    #     while i < size - 1
+    #       arr = yield(self[i], self[i+1])
+    #       i += 1
+    #     end
+    #     p arr
+    #     self
+    #   end
+    
+    # end
+      
+    
   end
   
   class Array
