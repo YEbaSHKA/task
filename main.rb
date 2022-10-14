@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # all? any? include? none? each map! map size count length select find find_all find_index reject max min
-# No completed: max min
+# No completed: max+- min+-
 
 require_relative './my_enumerable'
 
@@ -9,12 +9,10 @@ array1 = [10, 47, 8, -64, 147, 35]
 array2 = %w(rubya russia apple kotlina belorusian)
 array3 = []
 begin
-    # p array2.max(5){ |a, b| a.length <=> b.length }
-    # p array2.max(0)
-    # p array2.my_max(2){ |a, b| a.length <=> b.length }
-    # p array1.sort
-    # p array1.sort{|a, b| b <=> a}
-
+  p array1.min(0){ |a, b| a.size <=> b.size }
+  p array1.my_min(0){ |a, b| a.size <=> b.size }
+#   p array1.my_max(2){ |a, b| a.size <=> b.size }
+#   p array1.sort_by(&:size)
 #   p array1.my_find_index{ |i| i % 8 == 0}
 #   p array1.my_find_all{|n| n % 5 == 0}
 #   p array1.my_find{|n| n % 5 == 0}

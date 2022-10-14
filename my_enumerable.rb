@@ -213,30 +213,81 @@ module MyEnumerable
         end
     end
     
-    # def my_max(value = nil)
-    #   if value.nil?
-    #     max_value = self[0]
-    #     each {|item| max_value = item if max_value < item }
-    #     max_value
-    #   elsif !block_given?
-    #     arr = []
-    #     self.sort
-    #     arr = self.sort{|a, b| b <=> a}
-    #     arr[0..value-1]
-    #   else
-    #     arr = []
-    #     i = 0
-    #     while i < size - 1
-    #       arr = yield(self[i], self[i+1])
-    #       i += 1
-    #     end
-    #     p arr
-    #     self
-    #   end
+    def my_max(value = nil, &blc)
+      if value.nil? && !block_given?
+        max_value = self[0]
+        each {|item| max_value = item if max_value < item }
+        max_value
+      elsif !block_given?
+        arr = []
+        self.sort
+        arr = self.sort{|a, b| b <=> a}
+        if value == 0
+         arr = []
+        else
+        arr[0..value-1]
+        end
+      else
+        arr = []
+        i = 0
+        if value.nil?
+         while i < size - 1
+           arr = yield(self[i], self[i+1])
+           i += 1
+         end
+         self[0] 
+        elsif value == 0
+         arr = []
+        else
+         while i < size - 1
+           arr = yield(self[i], self[i+1])
+           i += 1
+         end
+         p self
+         p self.sort{|a, b| a <=> b }
+         self[0..value-1]
+       end
+        
+      end
     
-    # end
+    end
       
+    def my_min(value = nil, &blc)
+      if value.nil? && !block_given?
+        min_value = self[0]
+        each {|item| min_value = item if min_value > item }
+        min_value
+      elsif !block_given?
+        arr = []
+        arr = self.sort
+        if value == 0
+         arr = []
+        else
+        arr[0..value-1]
+        end
+      else
+        arr = []
+        i = 0
+        if value.nil?
+         while i < size - 1
+           arr = yield(self[i], self[i+1])
+           i += 1
+         end
+         self[0] 
+        elsif value == 0
+         arr = []
+        else
+         while i < size - 1
+           arr = yield(self[i], self[i+1])
+           i += 1
+         end
+         self[0..value-1]
+       end
+        
+      end
     
+    end
+
   end
   
   class Array
