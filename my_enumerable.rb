@@ -91,8 +91,10 @@ module MyEnumerable
         yield(self[i])
         i += 1
       end
+      self
+    else
+      to_enum(:my_each)
     end
-    self
   end
 
   def my_map!
@@ -102,8 +104,10 @@ module MyEnumerable
         self[i] = yield(self[i])
         i += 1
       end
+      self
+    else
+      to_enum(:my_map!)
     end
-    self
   end
 
   def my_map
@@ -129,29 +133,23 @@ module MyEnumerable
     my_length
   end
 
-  # def my_count(value = nil)
-  #   i = 0
-  #   result = 0
-  #   if !value.nil?
-  #     while i < my_size
-  #       result += 1 if self[i] == value
-  #       i += 1
-  #     end
-  #     result
+  def my_count(value = nil)
+    return my_length if value.nil? && !block_given?
 
-  #   # elsif block_given?
-  #   #   # if empty?
-  #   #   else
-  #   #     while i < my_size
-  #   #       result += 1 if yield(self[i])
-  #   #       i += 1
-  #   #     end
-  #   #   end
-  #   #   result
-  #   else
-  #     my_size
-  #   end
-  # end
+    if !value.nil?
+      counter = 0
+      each do |i|
+        counter += 1 if i == value
+      end
+      counter
+    else
+      counter = 0
+      each do |i|
+        counter += 1 if yield(i)
+      end
+      counter
+    end
+  end
 
   def my_select
     temp = []
@@ -167,15 +165,13 @@ module MyEnumerable
       end
       temp
     else
-      self
+      to_enum(:my_select)
     end
   end
 
   def my_find
     return to_enum(:my_find) unless block_given?
-
     each { |item| return item if yield(item) }
-    false
   end
 
   def my_find_all
@@ -186,87 +182,81 @@ module MyEnumerable
     temp
   end
 
-  def my_find_index
+  def my_find_index(value = nil)
     i = 0
+    if value != nil
+      each do |item|
+        return i if item == value
+        i += 1
+      end
+    end
     return to_enum(:my_find_index) unless block_given?
 
     each do |item|
       return i if yield(item)
-
       i += 1
     end
   end
 
   def my_max(value = nil)
-    if value.nil? && !block_given?
-      max_value = self[0]
-      each { |item| max_value = item if max_value < item }
-      max_value
-    elsif !block_given?
-      arr = []
-      sort
-      arr = sort { |a, b| b <=> a }
-      if value.zero?
-        arr = []
-      else
-        arr[0..value - 1]
+    arr = self
+    each_index do |j|
+      (arr.length - 1).downto j do |i|
+        arr[i-1], arr[i] = arr[i], arr[i-1] if arr[i] > arr[i-1]
       end
+    end
+    if !value.nil? && !block_given?
+      if value == 0
+        []
+      else
+        arr[0..value-1]
+      end
+    elsif !value.nil? && block_given?
+      
+        arr[0..value-1]
+      
+     
     else
-      arr = []
-      i = 0
-      if value.nil?
-        while i < size - 1
-          arr = yield(self[i], self[i + 1])
-          i += 1
-        end
-        self[0]
-      elsif value.zero?
-        arr = []
-      else
-        while i < size - 1
-          arr = yield(self[i], self[i + 1])
-          i += 1
-        end
-        p self
-        p sort { |a, b| a <=> b }
-        self[0..value - 1]
-      end
-
+      arr[0]
     end
   end
 
   def my_min(value = nil)
-    if value.nil? && !block_given?
-      min_value = self[0]
-      each { |item| min_value = item if min_value > item }
-      min_value
-    elsif !block_given?
-      arr = []
-      arr = sort
-      if value.zero?
-        arr = []
-      else
-        arr[0..value - 1]
+    swap = true
+    size = self.length - 1
+    while swap
+      swap = false
+      for i in 0...size
+        swap = self[i] > self[i + 1]
+        self[i], self[i+1] = self[i + 1], self[i] if swap
       end
+      size -= 1
+    end
+    if !value.nil? && !block_given?
+      if value == 0
+        []
+      else
+        self[0..value-1]
+      end
+    elsif !value.nil? && block_given?
+      if value == 0
+        []
+      else
+        swap_block = true
+        size = value - 1
+        while swap_block
+          swap_block = false
+          for i in 0...size
+            swap_block = yield(self[i], self[i + 1])
+            self[i], self[i+1] = self[i + 1], self[i] if swap_block
+          end
+        size -= 1
+        end
+        self[0..value-1]
+      end
+     
     else
-      arr = []
-      i = 0
-      if value.nil?
-        while i < size - 1
-          arr = yield(self[i], self[i + 1])
-          i += 1
-        end
-        self[0]
-      elsif value.zero?
-        arr = []
-      else
-        while i < size - 1
-          arr = yield(self[i], self[i + 1])
-          i += 1
-        end
-        self[0..value - 1]
-      end
-
+      self[0]
     end
   end
 end
