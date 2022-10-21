@@ -139,7 +139,7 @@ RSpec.describe MyEnumerable do
     end
 
     context 'without block' do
-      it { expect(array.my_select) == array.to_enum(:my_select)}
+      it { expect(array.my_select) == array.to_enum(:my_select) }
     end
   end
 

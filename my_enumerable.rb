@@ -2,6 +2,7 @@
 
 # module MyEnumerable
 module MyEnumerable
+  # rubocop:disable Metrics/PerceivedComplexity
   def my_inject(value = nil)
     result = value.nil? ? 0 : value
     i = 0
@@ -29,7 +30,7 @@ module MyEnumerable
   def my_all?(value = nil)
     if !value.nil?
       each do |ar_item|
-        return false unless value === ar_item
+        return false unless ar_item.is_a?(value)
       end
     elsif block_given?
       each do |ar_item|
@@ -53,7 +54,7 @@ module MyEnumerable
   def my_none?(value = nil)
     if !value.nil?
       each do |ar_item|
-        return false if value === ar_item
+        return false if ar_item.is_a?(value)
       end
     elsif block_given?
       each do |ar_item|
@@ -70,7 +71,7 @@ module MyEnumerable
   def my_any?(value = nil)
     if !value.nil?
       each do |ar_item|
-        return true if value === ar_item
+        return true if ar_item.is_a?(value)
       end
     elsif block_given?
       each do |ar_item|
@@ -136,19 +137,17 @@ module MyEnumerable
   def my_count(value = nil)
     return my_length if value.nil? && !block_given?
 
+    counter = 0
     if !value.nil?
-      counter = 0
       each do |i|
         counter += 1 if i == value
       end
-      counter
     else
-      counter = 0
       each do |i|
         counter += 1 if yield(i)
       end
-      counter
     end
+    counter
   end
 
   def my_select
@@ -171,6 +170,7 @@ module MyEnumerable
 
   def my_find
     return to_enum(:my_find) unless block_given?
+
     each { |item| return item if yield(item) }
   end
 
@@ -184,9 +184,10 @@ module MyEnumerable
 
   def my_find_index(value = nil)
     i = 0
-    if value != nil
+    unless value.nil?
       each do |item|
         return i if item == value
+
         i += 1
       end
     end
@@ -194,71 +195,58 @@ module MyEnumerable
 
     each do |item|
       return i if yield(item)
+
       i += 1
     end
   end
+  # rubocop:disable Metrics/AbcSize
 
   def my_max(value = nil)
     arr = self
     each_index do |j|
       (arr.length - 1).downto j do |i|
-        arr[i-1], arr[i] = arr[i], arr[i-1] if arr[i] > arr[i-1]
+        arr[i - 1], arr[i] = arr[i], arr[i - 1] if arr[i] > arr[i - 1]
       end
     end
     if !value.nil? && !block_given?
-      if value == 0
+      if value.zero?
         []
       else
-        arr[0..value-1]
+        arr[0..value - 1]
       end
     elsif !value.nil? && block_given?
-      
-        arr[0..value-1]
-      
-     
+      arr[0..value - 1]
     else
       arr[0]
     end
   end
 
   def my_min(value = nil)
-    swap = true
-    size = self.length - 1
-    while swap
-      swap = false
-      for i in 0...size
-        swap = self[i] > self[i + 1]
-        self[i], self[i+1] = self[i + 1], self[i] if swap
+    arr = self
+    each_index do |j|
+      (arr.length - 1).downto j do |i|
+        arr[i - 1], arr[i] = arr[i], arr[i - 1] if arr[i] < arr[i - 1]
       end
-      size -= 1
     end
     if !value.nil? && !block_given?
-      if value == 0
+      if value.zero?
         []
       else
-        self[0..value-1]
+        self[0..value - 1]
       end
     elsif !value.nil? && block_given?
-      if value == 0
+      if value.zero?
         []
       else
-        swap_block = true
-        size = value - 1
-        while swap_block
-          swap_block = false
-          for i in 0...size
-            swap_block = yield(self[i], self[i + 1])
-            self[i], self[i+1] = self[i + 1], self[i] if swap_block
-          end
-        size -= 1
-        end
-        self[0..value-1]
+        self[0..value - 1]
       end
-     
+
     else
       self[0]
     end
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/PerceivedComplexity
 end
 
 class Array
